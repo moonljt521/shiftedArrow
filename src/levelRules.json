@@ -1,0 +1,84 @@
+{
+  "$comment": "关卡难度规则配置。每个关卡用一组参数描述网格与棋子，并给出难度目标区间；生成器会按规则生成候选并筛选到目标难度。修改本文件即可调整关卡，无需改代码。",
+  "defaults": {
+    "lives": 3,
+    "lightning": 5,
+    "minPieceLen": 2,
+    "maxPieceLen": 6,
+    "serpentineAxis": "random",
+    "backbiteFactor": 6,
+    "maxAttempts": 600,
+    "difficulty": { "min": 0, "max": 1 }
+  },
+  "levels": [
+    {
+      "id": 1,
+      "rows": 10,
+      "cols": 7,
+      "maxPieceLen": 4,
+      "timeLimit": 180,
+      "difficulty": { "min": 0.0, "max": 0.3 }
+    },
+    {
+      "id": 2,
+      "rows": 11,
+      "cols": 7,
+      "maxPieceLen": 5,
+      "timeLimit": 170,
+      "difficulty": { "min": 0.1, "max": 0.35 }
+    },
+    {
+      "id": 3,
+      "rows": 11,
+      "cols": 8,
+      "maxPieceLen": 5,
+      "timeLimit": 160,
+      "difficulty": { "min": 0.2, "max": 0.45 }
+    },
+    {
+      "id": 4,
+      "rows": 12,
+      "cols": 8,
+      "minPieceLen": 3,
+      "maxPieceLen": 6,
+      "timeLimit": 150,
+      "difficulty": { "min": 0.3, "max": 0.55 }
+    },
+    {
+      "id": 5,
+      "rows": 12,
+      "cols": 9,
+      "minPieceLen": 3,
+      "maxPieceLen": 6,
+      "timeLimit": 135,
+      "difficulty": { "min": 0.4, "max": 0.65 }
+    },
+    {
+      "id": 6,
+      "rows": 13,
+      "cols": 9,
+      "minPieceLen": 3,
+      "maxPieceLen": 7,
+      "timeLimit": 120,
+      "difficulty": { "min": 0.5, "max": 0.75 }
+    },
+    {
+      "id": 7,
+      "rows": 13,
+      "cols": 10,
+      "minPieceLen": 3,
+      "maxPieceLen": 7,
+      "timeLimit": 105,
+      "difficulty": { "min": 0.6, "max": 0.85 }
+    },
+    {
+      "id": 8,
+      "rows": 14,
+      "cols": 10,
+      "minPieceLen": 3,
+      "maxPieceLen": 8,
+      "timeLimit": 90,
+      "difficulty": { "min": 0.7, "max": 1.0 }
+    }
+  ]
+}
