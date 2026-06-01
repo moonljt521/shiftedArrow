@@ -1,84 +1,115 @@
 {
-  "$comment": "关卡难度规则配置。每个关卡用一组参数描述网格与棋子，并给出难度目标区间；生成器会按规则生成候选并筛选到目标难度。修改本文件即可调整关卡，无需改代码。",
+  "$comment": "关卡难度规则配置。每个关卡用一组参数描述网格与棋子，并给出难度目标区间；生成器会按规则生成候选并筛选到目标难度。修改本文件即可调整关卡，无需改代码。当前目标是整体偏难，前期也有压力，后期要接近长蛇迷宫的高密度感。",
   "defaults": {
     "lives": 3,
-    "lightning": 5,
-    "minPieceLen": 2,
-    "maxPieceLen": 6,
+    "lightning": 3,
+    "minPieceLen": 4,
+    "maxPieceLen": 8,
     "serpentineAxis": "random",
-    "backbiteFactor": 6,
-    "maxAttempts": 600,
+    "backbiteFactor": 8,
+    "maxAttempts": 1500,
     "difficulty": { "min": 0, "max": 1 }
   },
   "levels": [
     {
       "id": 1,
-      "rows": 10,
-      "cols": 7,
-      "maxPieceLen": 4,
-      "timeLimit": 180,
-      "difficulty": { "min": 0.0, "max": 0.3 }
+      "rows": 8,
+      "cols": 6,
+      "minPieceLen": 4,
+      "maxPieceLen": 6,
+      "backbiteFactor": 4,
+      "timeLimit": 160,
+      "difficulty": { "min": 0.25, "max": 0.36 }
     },
     {
       "id": 2,
-      "rows": 11,
+      "rows": 8,
       "cols": 7,
-      "maxPieceLen": 5,
-      "timeLimit": 170,
-      "difficulty": { "min": 0.1, "max": 0.35 }
+      "minPieceLen": 4,
+      "maxPieceLen": 6,
+      "backbiteFactor": 5,
+      "timeLimit": 150,
+      "difficulty": { "min": 0.33, "max": 0.44 }
     },
     {
       "id": 3,
-      "rows": 11,
-      "cols": 8,
-      "maxPieceLen": 5,
-      "timeLimit": 160,
-      "difficulty": { "min": 0.2, "max": 0.45 }
+      "rows": 9,
+      "cols": 7,
+      "minPieceLen": 4,
+      "maxPieceLen": 7,
+      "backbiteFactor": 6,
+      "timeLimit": 140,
+      "difficulty": { "min": 0.40, "max": 0.52 }
     },
     {
       "id": 4,
-      "rows": 12,
-      "cols": 8,
-      "minPieceLen": 3,
-      "maxPieceLen": 6,
-      "timeLimit": 150,
-      "difficulty": { "min": 0.3, "max": 0.55 }
+      "rows": 10,
+      "cols": 7,
+      "minPieceLen": 5,
+      "maxPieceLen": 7,
+      "backbiteFactor": 7,
+      "timeLimit": 125,
+      "difficulty": { "min": 0.47, "max": 0.59 }
     },
     {
       "id": 5,
-      "rows": 12,
-      "cols": 9,
-      "minPieceLen": 3,
-      "maxPieceLen": 6,
-      "timeLimit": 135,
-      "difficulty": { "min": 0.4, "max": 0.65 }
+      "rows": 10,
+      "cols": 8,
+      "minPieceLen": 5,
+      "maxPieceLen": 8,
+      "backbiteFactor": 8,
+      "timeLimit": 110,
+      "difficulty": { "min": 0.54, "max": 0.66 }
     },
     {
       "id": 6,
-      "rows": 13,
-      "cols": 9,
-      "minPieceLen": 3,
-      "maxPieceLen": 7,
-      "timeLimit": 120,
-      "difficulty": { "min": 0.5, "max": 0.75 }
+      "rows": 11,
+      "cols": 8,
+      "minPieceLen": 5,
+      "maxPieceLen": 9,
+      "backbiteFactor": 9,
+      "timeLimit": 95,
+      "difficulty": { "min": 0.62, "max": 0.74 }
     },
     {
       "id": 7,
-      "rows": 13,
-      "cols": 10,
-      "minPieceLen": 3,
-      "maxPieceLen": 7,
-      "timeLimit": 105,
-      "difficulty": { "min": 0.6, "max": 0.85 }
+      "rows": 12,
+      "cols": 9,
+      "minPieceLen": 5,
+      "maxPieceLen": 10,
+      "backbiteFactor": 10,
+      "timeLimit": 85,
+      "difficulty": { "min": 0.70, "max": 0.82 }
     },
     {
       "id": 8,
+      "rows": 13,
+      "cols": 9,
+      "minPieceLen": 6,
+      "maxPieceLen": 11,
+      "backbiteFactor": 11,
+      "timeLimit": 75,
+      "difficulty": { "min": 0.78, "max": 0.90 }
+    },
+    {
+      "id": 9,
       "rows": 14,
       "cols": 10,
-      "minPieceLen": 3,
-      "maxPieceLen": 8,
-      "timeLimit": 90,
-      "difficulty": { "min": 0.7, "max": 1.0 }
+      "minPieceLen": 6,
+      "maxPieceLen": 12,
+      "backbiteFactor": 12,
+      "timeLimit": 70,
+      "difficulty": { "min": 0.86, "max": 0.96 }
+    },
+    {
+      "id": 10,
+      "rows": 14,
+      "cols": 10,
+      "minPieceLen": 6,
+      "maxPieceLen": 12,
+      "backbiteFactor": 14,
+      "timeLimit": 60,
+      "difficulty": { "min": 0.94, "max": 1.0 }
     }
   ]
 }

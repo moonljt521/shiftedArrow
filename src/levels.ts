@@ -158,13 +158,13 @@ function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
   const remaining = new Set<number>();
   for (let s = 0; s < snakes.length; s++) remaining.add(s);
 
-  const rayClear = (head: Cell, dir: Direction, selfId: number): boolean => {
+  const rayClear = (head: Cell, dir: Direction): boolean => {
     const { dr, dc } = DELTA[dir];
     let r = head.row + dr;
     let c = head.col + dc;
     while (inBounds(r, c)) {
       const o = work[idx(r, c)];
-      if (o !== -1 && o !== selfId) return false;
+      if (o !== -1) return false;
       r += dr;
       c += dc;
     }
@@ -179,11 +179,11 @@ function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
       const cells = snakes[s];
       const len = cells.length;
       const lastDir = dirBetween(cells[len - 2], cells[len - 1]);
-      if (rayClear(cells[len - 1], lastDir, s)) {
+      if (rayClear(cells[len - 1], lastDir)) {
         candidates.push({ snake: s, headIsLast: true, dir: lastDir });
       }
       const tailDir = dirBetween(cells[1], cells[0]);
-      if (rayClear(cells[0], tailDir, s)) {
+      if (rayClear(cells[0], tailDir)) {
         candidates.push({ snake: s, headIsLast: false, dir: tailDir });
       }
     }

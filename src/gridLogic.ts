@@ -10,7 +10,7 @@ export function headCell(piece: Piece) {
  *
  * 棋子是一条折线（蛇形），点击后沿头部方向 dir 飞出，身体沿头部轨迹跟随滑出。
  * 因此只需检查头部正前方的射线：沿 dir 直到网格边界，
- * 若存在任何"其它"未消除棋子占据的格子则受阻；自身格子不阻挡（身体会跟随移动）。
+ * 若存在任何未消除棋子占据的格子则受阻；包括自身格子。
  */
 export function canEliminate(state: GameState, piece: Piece): boolean;
 export function canEliminate(
@@ -48,8 +48,8 @@ export function canEliminate(
   let cc = head.col + dc;
   while (r >= 0 && r < rows && cc >= 0 && cc < cols) {
     const occupant = grid[r][cc];
-    if (occupant !== null && occupant !== piece.id) {
-      return false; // 被其它棋子阻挡
+    if (occupant !== null) {
+      return false; // 被棋子（包括自身）阻挡
     }
     r += dr;
     cc += dc;

@@ -17,6 +17,8 @@ export class GameController {
   private renderer: Renderer;
   private timerId: number | null = null;
   private paused = false;
+  private activeAnimations = 0;
+  private lockedPieces = new Set<number>();
 
   constructor(renderer: Renderer) {
     this.renderer = renderer;
@@ -38,31 +40,40 @@ export class GameController {
     this.state = createGameState(config, levelIndex);
     this.state.status = 'playing';
     this.paused = false;
+    this.activeAnimations = 0;
+    this.lockedPieces.clear();
+    this.state.isAnimating = false;
     this.renderer.mountGrid(this.state);
   }
 
   /** 核心交互：点击棋子 */
   handlePieceClick(id: number): void {
     const state = this.state;
-    if (state.status !== 'playing' || state.isAnimating || this.paused) return;
+    if (state.status !== 'playing' || this.paused || this.lockedPieces.has(id)) return;
 
     const piece = state.pieces.get(id);
     if (!piece || piece.removed) return;
 
     if (canEliminate(state, piece)) {
-      state.isAnimating = true;
+      this.lockedPieces.add(id);
+      this.beginAnimation();
+      eliminatePiece(state, id);
+      this.renderer.updateHUD(state);
       this.renderer.playEliminate(piece, () => {
-        eliminatePiece(state, id);
-        state.isAnimating = false;
-        this.renderer.updateHUD(state);
-        if (isLevelComplete(state)) this.onLevelWon();
+        this.lockedPieces.delete(id);
+        this.endAnimation();
+        this.renderer.clearAllHints();
+        if (isLevelComplete(state) && this.activeAnimations === 0) this.onLevelWon();
       });
     } else {
-      state.isAnimating = true;
+      this.lockedPieces.add(id);
+      this.beginAnimation();
       this.renderer.playFail(piece, () => {
-        state.isAnimating = false;
+        this.lockedPieces.delete(id);
         loseLife(state);
+        this.renderer.clearAllHints();
         this.renderer.updateHUD(state);
+        this.endAnimation();
         if (state.lives <= 0) this.onLevelLost();
       });
     }
@@ -78,6 +89,7 @@ export class GameController {
       state.timerStarted = true;
       this.startTimer();
     }
+    this.renderer.clearAllHints();
     this.renderer.markHint(id);
     this.renderer.updateHUD(state);
   }
@@ -85,6 +97,16 @@ export class GameController {
   private startTimer(): void {
     this.stopTimer();
     this.timerId = window.setInterval(() => this.tickTimer(), 1000);
+  }
+
+  private beginAnimation(): void {
+    this.activeAnimations += 1;
+    this.state.isAnimating = true;
+  }
+
+  private endAnimation(): void {
+    this.activeAnimations = Math.max(0, this.activeAnimations - 1);
+    this.state.isAnimating = this.activeAnimations > 0;
   }
 
   private stopTimer(): void {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { canEliminate, difficultyScore, hasAnyMove, solve } from '../src/gridLogic';
-import { createGameState } from '../src/gameState';
+import { createGameState, useHint } from '../src/gameState';
 import { LEVELS } from '../src/levels';
 import rules from '../src/levelRules.json';
 import { Cell, Direction, GameState, Piece, dirBetween } from '../src/types';
@@ -68,19 +68,22 @@ describe('canEliminate（折线棋子）', () => {
     expect(canEliminate(state, a)).toBe(false);
   });
 
-  it('自身格子不阻挡头部射线', () => {
-    // L 形：身体在头部前方的同列，但属于自身，不应阻挡
+  it('自身格子会阻挡头部射线', () => {
+    // 这条折线路径的头部向左时，会撞到自己更左边的身体
     const a = makePiece(
       0,
       [
-        { row: 0, col: 3 },
-        { row: 1, col: 3 },
+        { row: 0, col: 0 },
+        { row: 1, col: 0 },
+        { row: 1, col: 1 },
         { row: 1, col: 2 },
+        { row: 0, col: 2 },
+        { row: 0, col: 1 },
       ],
       'left'
     );
     const state = buildState(6, 6, [a]);
-    expect(canEliminate(state, a)).toBe(true);
+    expect(canEliminate(state, a)).toBe(false);
   });
 
   it('阻挡棋子消除后头部射线畅通', () => {
@@ -111,6 +114,15 @@ describe('solve & hasAnyMove', () => {
     const state = buildState(1, 3, [a, b]);
     expect(hasAnyMove(state)).toBe(false);
     expect(solve(state)).toBeNull();
+  });
+
+  it('提示返回的棋子必须是当前可消除棋子', () => {
+    for (const level of LEVELS) {
+      const state = createGameState(level, level.id - 1);
+      const id = useHint(state);
+      expect(id).not.toBeNull();
+      expect(canEliminate(state, state.pieces.get(id!))).toBe(true);
+    }
   });
 });
 

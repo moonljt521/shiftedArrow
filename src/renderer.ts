@@ -136,7 +136,8 @@ export class Renderer {
     g.setAttribute('class', 'piece');
     g.dataset.id = String(piece.id);
 
-    const stroke = Math.max(4, Math.floor(this.cellSize * 0.22));
+    // 参考图是更细的线条，主视觉收一档，但命中区保持更宽，避免影响操作手感
+    const stroke = Math.max(2.4, this.cellSize * 0.14);
 
     // 1) 折线主体：画到头部格中心（不回缩），让箭头三角覆盖在末端之上，二者始终相连
     const d = this.fullPath(piece);
@@ -269,7 +270,7 @@ export class Renderer {
     line.style.strokeLinecap = 'round';
 
     const travel = bodyLen + extLen; // 让尾巴也走过出界点
-    const duration = 460;
+    const duration = 680;
     const start = performance.now();
 
     const frame = (now: number) => {
@@ -316,6 +317,12 @@ export class Renderer {
 
   clearHint(pieceId: number): void {
     this.pieceEls.get(pieceId)?.classList.remove('hinted');
+  }
+
+  clearAllHints(): void {
+    for (const el of this.pieceEls.values()) {
+      el.classList.remove('hinted');
+    }
   }
 
   updateHUD(state: GameState): void {
