@@ -102,16 +102,13 @@ export function solve(state: GameState): number[] | null {
 }
 
 /**
- * 难度评分（0~1，越大越难）。基于「消除自由度」与「依赖层级」两个客观指标：
+ * 难度评分（0~1，越大越难）。
  *
- * - layers：按贪心一层层剥离——每一轮把当前所有可消除的棋子同时移除，记为一层。
- *           层数越多 = 强制的先后依赖越深 = 越难。
- * - freeRatio：初始局面可立即消除的棋子占比。占比越低 = 起手选择越少 = 越难。
+ * - layers：贪心剥离层数（依赖深度）。用对数缩放，避免被大网格稀释。
+ * - freeRatio：起手可消除占比。用 sqrt 变换，低自由度惩罚更明显。
+ * - bendDensity：弯折密度（棋子内部方向变化频率）。
  *
- * 难度 = 0.6 * 依赖深度分 + 0.4 * (1 - 起手自由度)
- *   依赖深度分 = (层数 - 1) / (棋子数 - 1)，归一化到 0~1。
- *
- * 返回 0~1；若局面无解返回 1（视为最难/不可用，生成器会据此筛掉）。
+ * 返回 0~1；若局面无解返回 1。
  */
 export function difficultyScore(state: GameState): number {
   const rows = state.rows;
@@ -165,8 +162,10 @@ export function difficultyScore(state: GameState): number {
 
   if (remaining.size > 0) return 1; // 无解
 
-  const depthScore = (layers - 1) / (n - 1); // 0~1
-  const freeRatio = firstLayerFree / n; // 0~1
-  const score = 0.5 * depthScore + 0.35 * (1 - freeRatio) + 0.15 * bendDensity;
+  // 对数缩放深度分：不被大网格稀释
+  const depthScore = Math.log(1 + layers) / Math.log(1 + n);
+  const freeRatio = firstLayerFree / n;
+  // sqrt 变换：低自由度惩罚更强；弯折密度权重提高
+  const score = 0.40 * depthScore + 0.30 * (1 - Math.sqrt(freeRatio)) + 0.30 * bendDensity;
   return Math.max(0, Math.min(1, score));
 }
