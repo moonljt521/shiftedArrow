@@ -121,7 +121,7 @@ describe('solve & hasAnyMove', () => {
       const state = createGameState(level, level.id - 1);
       const id = useHint(state);
       expect(id).not.toBeNull();
-      expect(canEliminate(state, state.pieces.get(id!))).toBe(true);
+      expect(canEliminate(state, state.pieces.get(id!)!)).toBe(true);
     }
   });
 });

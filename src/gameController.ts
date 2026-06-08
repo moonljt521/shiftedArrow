@@ -59,6 +59,7 @@ export class GameController {
       this.beginAnimation();
       eliminatePiece(state, id);
       this.renderer.updateHUD(state);
+      this.renderer.drawGuideLines(state);
       this.renderer.playEliminate(piece, () => {
         this.lockedPieces.delete(id);
         this.endAnimation();
@@ -68,7 +69,7 @@ export class GameController {
     } else {
       this.lockedPieces.add(id);
       this.beginAnimation();
-      this.renderer.playFail(piece, () => {
+      this.renderer.playFail(piece, state, () => {
         this.lockedPieces.delete(id);
         loseLife(state);
         this.renderer.clearAllHints();

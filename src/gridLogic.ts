@@ -1,4 +1,4 @@
-import { DELTA, GameState, Piece } from './types';
+import { DELTA, GameState, Piece, dirBetween } from './types';
 
 /** 获取棋子头部单元格（cells 末尾） */
 export function headCell(piece: Piece) {
@@ -128,6 +128,21 @@ export function difficultyScore(state: GameState): number {
   const n = remaining.size;
   if (n <= 1) return 0;
 
+  // 弯折密度：所有棋子内部方向变化次数 / 相邻格子对数
+  let totalBends = 0;
+  let totalSegments = 0;
+  for (const piece of pieces.values()) {
+    const cells = piece.cells;
+    if (cells.length < 3) continue;
+    for (let i = 2; i < cells.length; i++) {
+      const d1 = dirBetween(cells[i - 2], cells[i - 1]);
+      const d2 = dirBetween(cells[i - 1], cells[i]);
+      if (d1 !== d2) totalBends++;
+      totalSegments++;
+    }
+  }
+  const bendDensity = totalSegments === 0 ? 0 : totalBends / totalSegments;
+
   let firstLayerFree = 0;
   let layers = 0;
   let progress = true;
@@ -152,6 +167,6 @@ export function difficultyScore(state: GameState): number {
 
   const depthScore = (layers - 1) / (n - 1); // 0~1
   const freeRatio = firstLayerFree / n; // 0~1
-  const score = 0.6 * depthScore + 0.4 * (1 - freeRatio);
+  const score = 0.5 * depthScore + 0.35 * (1 - freeRatio) + 0.15 * bendDensity;
   return Math.max(0, Math.min(1, score));
 }

@@ -189,7 +189,37 @@ function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
     }
     if (candidates.length === 0) return null; // 死锁
 
-    const pick = candidates[Math.floor(rng() * candidates.length)];
+    // 智能选择：选移除后释放最少新可消除棋子的候选，加深依赖链
+    let bestScore = Infinity;
+    let bestCandidates: typeof candidates = [];
+    for (const candidate of candidates) {
+      const cells = snakes[candidate.snake];
+      // 临时清除该棋子的格子
+      for (const cell of cells) work[idx(cell.row, cell.col)] = -1;
+      // 统计剩余棋子中此时有多少可消除
+      let clearCount = 0;
+      for (const s of remaining) {
+        if (s === candidate.snake) continue;
+        const scells = snakes[s];
+        const slen = scells.length;
+        const sLastDir = dirBetween(scells[slen - 2], scells[slen - 1]);
+        if (rayClear(scells[slen - 1], sLastDir)) {
+          clearCount++;
+        } else {
+          const sTailDir = dirBetween(scells[1], scells[0]);
+          if (rayClear(scells[0], sTailDir)) clearCount++;
+        }
+      }
+      // 恢复 work 数组
+      for (const cell of cells) work[idx(cell.row, cell.col)] = candidate.snake;
+      if (clearCount < bestScore) {
+        bestScore = clearCount;
+        bestCandidates = [candidate];
+      } else if (clearCount === bestScore) {
+        bestCandidates.push(candidate);
+      }
+    }
+    const pick = bestCandidates[Math.floor(rng() * bestCandidates.length)];
     const cells = snakes[pick.snake];
     const ordered = pick.headIsLast ? cells.slice() : cells.slice().reverse();
     oriented.set(pick.snake, { cells: ordered, dir: pick.dir });

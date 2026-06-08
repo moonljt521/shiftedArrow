@@ -66,7 +66,7 @@ describe('GameController + Renderer 集成点击', () => {
     expect(cells.length).toBeGreaterThan(0);
     expect(cells[0].disabled).toBe(false); // 第 1 关可选
     expect(cells[2].disabled).toBe(false); // 第 3 关已解锁
-    expect(cells[cells.length - 1].disabled).toBe(true); // 末关未解锁
+    expect(cells[cells.length - 1].disabled).toBe(false); // 末关也可选（无锁定）
   });
 
   it('点击⚙打开暂停菜单并可继续', () => {
