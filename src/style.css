@@ -15,6 +15,85 @@
   --line: #e6eef5;
 }
 
+[data-theme="dark"] {
+  --bg-blue: #1a1f2e;
+  --board-white: #232a3a;
+  --arrow-color: #d4dde8;
+  --fail-red: #ff6b6b;
+  --hint-gray: #6b7a8d;
+  --hint-blue: #5bb8f5;
+  --line: #2e3748;
+}
+
+[data-theme="dark"] .icon-btn {
+  background: #3a4560;
+  color: #c8d4e0;
+}
+
+[data-theme="dark"] .level-title,
+[data-theme="dark"] .timer {
+  color: #c8d4e0;
+}
+
+[data-theme="dark"] .timer {
+  background: #2e3748;
+}
+
+[data-theme="dark"] .modal {
+  background: #2a3245;
+  color: #d4dde8;
+}
+
+[data-theme="dark"] .modal-msg {
+  color: #8a9ab0;
+}
+
+[data-theme="dark"] .ov-btn {
+  background: #3a4560;
+  color: #c8d4e0;
+}
+
+[data-theme="dark"] .ov-btn.primary {
+  background: #4aa3e8;
+  color: #fff;
+}
+
+[data-theme="dark"] .level-cell {
+  background: #3a4560;
+}
+
+[data-theme="dark"] .level-cell.locked {
+  background: #2a3245;
+  color: #5a6a80;
+}
+
+[data-theme="dark"] .tool-btn {
+  background: #3a4560;
+  color: #c8d4e0;
+}
+
+[data-theme="dark"] .tool-btn.active {
+  background: #2ecc71;
+  color: #fff;
+}
+
+[data-theme="dark"] .zoom-btn {
+  background: #3a4560;
+  color: #8a9ab0;
+}
+
+[data-theme="dark"] .zoom-slider {
+  background: #3a4560;
+}
+
+[data-theme="dark"] .zoom-slider::-webkit-slider-thumb {
+  background: #5bb8f5;
+}
+
+[data-theme="dark"] .zoom-label {
+  color: #8a9ab0;
+}
+
 html,
 body {
   height: 100%;
@@ -150,6 +229,8 @@ body {
 
 .grid-lines-layer line {
   pointer-events: none;
+  stroke: var(--line);
+  stroke-width: 0.5;
 }
 
 .guide-layer {

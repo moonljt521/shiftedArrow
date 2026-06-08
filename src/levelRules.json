@@ -13,103 +13,103 @@
   "levels": [
     {
       "id": 1,
-      "rows": 20,
-      "cols": 14,
-      "minPieceLen": 4,
-      "maxPieceLen": 8,
-      "backbiteFactor": 30,
+      "rows": 12,
+      "cols": 9,
+      "minPieceLen": 3,
+      "maxPieceLen": 6,
+      "backbiteFactor": 20,
       "timeLimit": 120,
-      "difficulty": { "min": 0.80, "max": 0.86 }
+      "difficulty": { "min": 0.55, "max": 0.68 }
     },
     {
       "id": 2,
-      "rows": 20,
-      "cols": 14,
-      "minPieceLen": 4,
-      "maxPieceLen": 9,
-      "backbiteFactor": 32,
+      "rows": 13,
+      "cols": 9,
+      "minPieceLen": 3,
+      "maxPieceLen": 6,
+      "backbiteFactor": 22,
       "timeLimit": 110,
-      "difficulty": { "min": 0.82, "max": 0.88 }
+      "difficulty": { "min": 0.57, "max": 0.70 }
     },
     {
       "id": 3,
-      "rows": 22,
-      "cols": 15,
-      "minPieceLen": 5,
-      "maxPieceLen": 9,
-      "backbiteFactor": 34,
+      "rows": 14,
+      "cols": 10,
+      "minPieceLen": 4,
+      "maxPieceLen": 7,
+      "backbiteFactor": 24,
       "timeLimit": 105,
-      "difficulty": { "min": 0.84, "max": 0.89 }
+      "difficulty": { "min": 0.59, "max": 0.72 }
     },
     {
       "id": 4,
-      "rows": 22,
-      "cols": 15,
-      "minPieceLen": 5,
-      "maxPieceLen": 10,
-      "backbiteFactor": 36,
+      "rows": 14,
+      "cols": 10,
+      "minPieceLen": 4,
+      "maxPieceLen": 7,
+      "backbiteFactor": 26,
       "timeLimit": 100,
-      "difficulty": { "min": 0.85, "max": 0.91 }
+      "difficulty": { "min": 0.61, "max": 0.74 }
     },
     {
       "id": 5,
-      "rows": 22,
-      "cols": 16,
-      "minPieceLen": 5,
-      "maxPieceLen": 10,
-      "backbiteFactor": 38,
+      "rows": 15,
+      "cols": 11,
+      "minPieceLen": 4,
+      "maxPieceLen": 8,
+      "backbiteFactor": 28,
       "timeLimit": 95,
-      "difficulty": { "min": 0.87, "max": 0.92 }
+      "difficulty": { "min": 0.63, "max": 0.76 }
     },
     {
       "id": 6,
-      "rows": 24,
-      "cols": 16,
-      "minPieceLen": 5,
-      "maxPieceLen": 11,
-      "backbiteFactor": 40,
-      "timeLimit": 90,
-      "difficulty": { "min": 0.88, "max": 0.93 }
+      "rows": 16,
+      "cols": 11,
+      "minPieceLen": 4,
+      "maxPieceLen": 8,
+      "backbiteFactor": 30,
+      "timeLimit": 85,
+      "difficulty": { "min": 0.65, "max": 0.78 }
     },
     {
       "id": 7,
-      "rows": 24,
-      "cols": 16,
-      "minPieceLen": 6,
-      "maxPieceLen": 11,
-      "backbiteFactor": 42,
-      "timeLimit": 80,
-      "difficulty": { "min": 0.90, "max": 0.95 }
+      "rows": 17,
+      "cols": 12,
+      "minPieceLen": 5,
+      "maxPieceLen": 9,
+      "backbiteFactor": 32,
+      "timeLimit": 75,
+      "difficulty": { "min": 0.67, "max": 0.80 }
     },
     {
       "id": 8,
-      "rows": 24,
-      "cols": 18,
-      "minPieceLen": 6,
-      "maxPieceLen": 12,
-      "backbiteFactor": 44,
-      "timeLimit": 70,
-      "difficulty": { "min": 0.91, "max": 0.96 }
+      "rows": 18,
+      "cols": 12,
+      "minPieceLen": 5,
+      "maxPieceLen": 9,
+      "backbiteFactor": 34,
+      "timeLimit": 65,
+      "difficulty": { "min": 0.69, "max": 0.82 }
     },
     {
       "id": 9,
-      "rows": 26,
-      "cols": 18,
-      "minPieceLen": 6,
-      "maxPieceLen": 12,
-      "backbiteFactor": 46,
-      "timeLimit": 60,
-      "difficulty": { "min": 0.93, "max": 0.97 }
+      "rows": 19,
+      "cols": 13,
+      "minPieceLen": 5,
+      "maxPieceLen": 10,
+      "backbiteFactor": 36,
+      "timeLimit": 55,
+      "difficulty": { "min": 0.71, "max": 0.84 }
     },
     {
       "id": 10,
-      "rows": 26,
-      "cols": 20,
-      "minPieceLen": 7,
-      "maxPieceLen": 13,
-      "backbiteFactor": 50,
-      "timeLimit": 50,
-      "difficulty": { "min": 0.95, "max": 0.99 }
+      "rows": 20,
+      "cols": 14,
+      "minPieceLen": 5,
+      "maxPieceLen": 10,
+      "backbiteFactor": 38,
+      "timeLimit": 45,
+      "difficulty": { "min": 0.73, "max": 0.86 }
     }
   ]
 }

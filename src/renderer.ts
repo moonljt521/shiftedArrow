@@ -79,6 +79,7 @@ export class Renderer {
       <div class="game">
         <header class="hud">
           <div class="hud-left">
+            <button class="icon-btn" id="btn-theme" aria-label="明暗模式">🌙</button>
             <button class="icon-btn" id="btn-settings" aria-label="设置">⚙</button>
             <button class="icon-btn" id="btn-eye" aria-label="选择关卡">☰</button>
           </div>
@@ -133,6 +134,22 @@ export class Renderer {
     this.hintBtn.addEventListener('click', () => this.hintHandler());
     this.byId('btn-settings').addEventListener('click', () => this.settingsHandler());
     this.byId('btn-eye').addEventListener('click', () => this.levelSelectHandler());
+
+    // 明暗模式切换
+    const themeBtn = this.byId('btn-theme');
+    const applyTheme = (dark: boolean) => {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      themeBtn.textContent = dark ? '☀️' : '🌙';
+    };
+    // 加载保存的偏好
+    const savedDark = localStorage.getItem('arrow-theme') === 'dark';
+    applyTheme(savedDark);
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = !isDark;
+      applyTheme(next);
+      try { localStorage.setItem('arrow-theme', next ? 'dark' : 'light'); } catch {}
+    });
 
     // zoom slider
     this.zoomSlider.addEventListener('input', () => {
@@ -282,8 +299,6 @@ export class Renderer {
     this.gridLinesGroup.innerHTML = '';
     const w = this.cols * this.cellSize;
     const h = this.rows * this.cellSize;
-    const color = '#e6eef5';
-    const sw = 0.5;
     // vertical lines
     for (let c = 0; c <= this.cols; c++) {
       const line = document.createElementNS(SVG_NS, 'line');
@@ -291,8 +306,6 @@ export class Renderer {
       line.setAttribute('y1', '0');
       line.setAttribute('x2', String(c * this.cellSize));
       line.setAttribute('y2', String(h));
-      line.setAttribute('stroke', color);
-      line.setAttribute('stroke-width', String(sw));
       this.gridLinesGroup.appendChild(line);
     }
     // horizontal lines
@@ -302,8 +315,6 @@ export class Renderer {
       line.setAttribute('y1', String(r * this.cellSize));
       line.setAttribute('x2', String(w));
       line.setAttribute('y2', String(r * this.cellSize));
-      line.setAttribute('stroke', color);
-      line.setAttribute('stroke-width', String(sw));
       this.gridLinesGroup.appendChild(line);
     }
   }
