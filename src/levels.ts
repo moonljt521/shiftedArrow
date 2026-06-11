@@ -2,6 +2,7 @@ import { Cell, DELTA, Direction, LevelConfig, dirBetween } from './types';
 import { createGameState } from './gameState';
 import { difficultyScore, solve } from './gridLogic';
 import rules from './levelRules.json';
+import cachedLevels from './levelData.json';
 
 function makeRng(seed: number): () => number {
   let a = seed >>> 0;
@@ -433,16 +434,17 @@ function buildLevel(rule: LevelRule, baseSeed: number): LevelConfig {
   };
 }
 
-/** 按需加载关卡缓存 */
-const levelCache = new Map<number, LevelConfig>();
+/** 按需加载关卡：优先使用预计算缓存，无缓存则实时生成 */
+const precomputed = cachedLevels as LevelConfig[];
 
 export function getLevel(index: number): LevelConfig {
   const clamped = Math.max(0, Math.min(index, RULES.levels.length - 1));
-  if (!levelCache.has(clamped)) {
-    const rule = RULES.levels[clamped];
-    levelCache.set(clamped, buildLevel(rule, rule.id * 100003));
+  if (clamped < precomputed.length) {
+    return precomputed[clamped];
   }
-  return levelCache.get(clamped)!;
+  // 预计算数据未覆盖的关卡，回退到实时生成
+  const rule = RULES.levels[clamped];
+  return buildLevel(rule, rule.id * 100003);
 }
 
 export function levelCount(): number {

@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npx tsx scripts/precomputeLevels.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "precompute": "npx tsx scripts/precomputeLevels.ts"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
+    "tsx": "^4.22.4",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
     "vitest": "^2.1.4"
