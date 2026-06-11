@@ -329,18 +329,20 @@ function buildLevel(rule: LevelRule, baseSeed: number): LevelConfig {
   };
 }
 
-/** 由 JSON 规则生成的全部内置关卡 */
-export const LEVELS: LevelConfig[] = RULES.levels.map((rule) =>
-  buildLevel(rule, rule.id * 100003)
-);
+/** 按需加载关卡缓存 */
+const levelCache = new Map<number, LevelConfig>();
 
 export function getLevel(index: number): LevelConfig {
-  const clamped = Math.max(0, Math.min(index, LEVELS.length - 1));
-  return LEVELS[clamped];
+  const clamped = Math.max(0, Math.min(index, RULES.levels.length - 1));
+  if (!levelCache.has(clamped)) {
+    const rule = RULES.levels[clamped];
+    levelCache.set(clamped, buildLevel(rule, rule.id * 100003));
+  }
+  return levelCache.get(clamped)!;
 }
 
 export function levelCount(): number {
-  return LEVELS.length;
+  return RULES.levels.length;
 }
 
 /** 暴露默认生命/闪电配置，供其它模块读取 JSON 规则 */

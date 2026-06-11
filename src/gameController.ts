@@ -160,8 +160,11 @@ export class GameController {
   private handleOverlayAction(action: string): void {
     if (action.startsWith('goto:')) {
       const idx = Number(action.slice(5));
-      this.renderer.hideOverlay();
-      this.startLevel(idx);
+      this.renderer.showLoading(`加载关卡 ${idx + 1}...`);
+      setTimeout(() => {
+        this.renderer.hideOverlay();
+        this.startLevel(idx);
+      }, 50);
       return;
     }
     switch (action) {

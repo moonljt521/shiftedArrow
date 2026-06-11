@@ -13,96 +13,6 @@
   "levels": [
     {
       "id": 1,
-      "rows": 16,
-      "cols": 11,
-      "minPieceLen": 4,
-      "maxPieceLen": 8,
-      "backbiteFactor": 30,
-      "timeLimit": 120,
-      "difficulty": { "min": 0.62, "max": 0.74 }
-    },
-    {
-      "id": 2,
-      "rows": 16,
-      "cols": 12,
-      "minPieceLen": 4,
-      "maxPieceLen": 8,
-      "backbiteFactor": 32,
-      "timeLimit": 110,
-      "difficulty": { "min": 0.64, "max": 0.76 }
-    },
-    {
-      "id": 3,
-      "rows": 17,
-      "cols": 12,
-      "minPieceLen": 5,
-      "maxPieceLen": 9,
-      "backbiteFactor": 34,
-      "timeLimit": 100,
-      "difficulty": { "min": 0.66, "max": 0.78 }
-    },
-    {
-      "id": 4,
-      "rows": 18,
-      "cols": 12,
-      "minPieceLen": 5,
-      "maxPieceLen": 9,
-      "backbiteFactor": 36,
-      "timeLimit": 95,
-      "difficulty": { "min": 0.68, "max": 0.80 }
-    },
-    {
-      "id": 5,
-      "rows": 18,
-      "cols": 13,
-      "minPieceLen": 5,
-      "maxPieceLen": 10,
-      "backbiteFactor": 38,
-      "timeLimit": 85,
-      "difficulty": { "min": 0.70, "max": 0.82 }
-    },
-    {
-      "id": 6,
-      "rows": 19,
-      "cols": 13,
-      "minPieceLen": 5,
-      "maxPieceLen": 10,
-      "backbiteFactor": 40,
-      "timeLimit": 80,
-      "difficulty": { "min": 0.72, "max": 0.84 }
-    },
-    {
-      "id": 7,
-      "rows": 20,
-      "cols": 14,
-      "minPieceLen": 5,
-      "maxPieceLen": 10,
-      "backbiteFactor": 42,
-      "timeLimit": 70,
-      "difficulty": { "min": 0.74, "max": 0.86 }
-    },
-    {
-      "id": 8,
-      "rows": 20,
-      "cols": 14,
-      "minPieceLen": 6,
-      "maxPieceLen": 11,
-      "backbiteFactor": 44,
-      "timeLimit": 60,
-      "difficulty": { "min": 0.76, "max": 0.88 }
-    },
-    {
-      "id": 9,
-      "rows": 22,
-      "cols": 15,
-      "minPieceLen": 6,
-      "maxPieceLen": 11,
-      "backbiteFactor": 46,
-      "timeLimit": 50,
-      "difficulty": { "min": 0.78, "max": 0.90 }
-    },
-    {
-      "id": 10,
       "rows": 22,
       "cols": 16,
       "minPieceLen": 6,
@@ -110,6 +20,96 @@
       "backbiteFactor": 50,
       "timeLimit": 45,
       "difficulty": { "min": 0.80, "max": 0.92 }
+    },
+    {
+      "id": 2,
+      "rows": 23,
+      "cols": 16,
+      "minPieceLen": 6,
+      "maxPieceLen": 12,
+      "backbiteFactor": 52,
+      "timeLimit": 42,
+      "difficulty": { "min": 0.81, "max": 0.93 }
+    },
+    {
+      "id": 3,
+      "rows": 23,
+      "cols": 17,
+      "minPieceLen": 6,
+      "maxPieceLen": 13,
+      "backbiteFactor": 54,
+      "timeLimit": 40,
+      "difficulty": { "min": 0.82, "max": 0.93 }
+    },
+    {
+      "id": 4,
+      "rows": 24,
+      "cols": 17,
+      "minPieceLen": 7,
+      "maxPieceLen": 13,
+      "backbiteFactor": 56,
+      "timeLimit": 38,
+      "difficulty": { "min": 0.83, "max": 0.94 }
+    },
+    {
+      "id": 5,
+      "rows": 24,
+      "cols": 18,
+      "minPieceLen": 7,
+      "maxPieceLen": 13,
+      "backbiteFactor": 58,
+      "timeLimit": 36,
+      "difficulty": { "min": 0.84, "max": 0.94 }
+    },
+    {
+      "id": 6,
+      "rows": 25,
+      "cols": 18,
+      "minPieceLen": 7,
+      "maxPieceLen": 14,
+      "backbiteFactor": 60,
+      "timeLimit": 34,
+      "difficulty": { "min": 0.85, "max": 0.95 }
+    },
+    {
+      "id": 7,
+      "rows": 26,
+      "cols": 18,
+      "minPieceLen": 7,
+      "maxPieceLen": 14,
+      "backbiteFactor": 62,
+      "timeLimit": 32,
+      "difficulty": { "min": 0.86, "max": 0.95 }
+    },
+    {
+      "id": 8,
+      "rows": 26,
+      "cols": 19,
+      "minPieceLen": 8,
+      "maxPieceLen": 14,
+      "backbiteFactor": 64,
+      "timeLimit": 30,
+      "difficulty": { "min": 0.87, "max": 0.96 }
+    },
+    {
+      "id": 9,
+      "rows": 27,
+      "cols": 19,
+      "minPieceLen": 8,
+      "maxPieceLen": 15,
+      "backbiteFactor": 66,
+      "timeLimit": 28,
+      "difficulty": { "min": 0.88, "max": 0.96 }
+    },
+    {
+      "id": 10,
+      "rows": 28,
+      "cols": 20,
+      "minPieceLen": 8,
+      "maxPieceLen": 15,
+      "backbiteFactor": 68,
+      "timeLimit": 25,
+      "difficulty": { "min": 0.89, "max": 0.97 }
     }
   ]
 }

@@ -838,4 +838,14 @@ export class Renderer {
     this.overlayEl.classList.add('hidden');
     this.overlayEl.innerHTML = '';
   }
+
+  showLoading(msg: string): void {
+    this.overlayEl.innerHTML = `
+      <div class="modal loading-modal">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">${msg}</div>
+      </div>
+    `;
+    this.overlayEl.classList.remove('hidden');
+  }
 }
