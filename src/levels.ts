@@ -3,8 +3,6 @@ import { createGameState } from './gameState';
 import { difficultyScore, solve } from './gridLogic';
 import rules from './levelRules.json';
 
-const DIRS: Direction[] = ['up', 'down', 'left', 'right'];
-
 function makeRng(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
@@ -34,20 +32,23 @@ interface GenParams {
  * 构建蛇形（serpentine）哈密顿路径：逐行蛇行遍历，覆盖每个格子恰好一次。
  * transpose=true 时按列蛇行。保证全覆盖。
  */
-function serpentine(rows: number, cols: number, transpose: boolean): Cell[] {
-  const path: Cell[] = [];
+function serpentine(rows: number, cols: number, transpose: boolean): { pathR: Int32Array; pathC: Int32Array } {
+  const n = rows * cols;
+  const pathR = new Int32Array(n);
+  const pathC = new Int32Array(n);
+  let idx = 0;
   if (!transpose) {
     for (let r = 0; r < rows; r++) {
-      if (r % 2 === 0) for (let c = 0; c < cols; c++) path.push({ row: r, col: c });
-      else for (let c = cols - 1; c >= 0; c--) path.push({ row: r, col: c });
+      if (r % 2 === 0) for (let c = 0; c < cols; c++) { pathR[idx] = r; pathC[idx] = c; idx++; }
+      else for (let c = cols - 1; c >= 0; c--) { pathR[idx] = r; pathC[idx] = c; idx++; }
     }
   } else {
     for (let c = 0; c < cols; c++) {
-      if (c % 2 === 0) for (let r = 0; r < rows; r++) path.push({ row: r, col: c });
-      else for (let r = rows - 1; r >= 0; r--) path.push({ row: r, col: c });
+      if (c % 2 === 0) for (let r = 0; r < rows; r++) { pathR[idx] = r; pathC[idx] = c; idx++; }
+      else for (let r = rows - 1; r >= 0; r--) { pathR[idx] = r; pathC[idx] = c; idx++; }
     }
   }
-  return path;
+  return { pathR, pathC };
 }
 
 /**
@@ -59,72 +60,87 @@ function serpentine(rows: number, cols: number, transpose: boolean): Cell[] {
  *      该操作不改变所覆盖的格子集合，仍是哈密顿路径。
  */
 function backbite(
-  path: Cell[],
+  pathR: Int32Array,
+  pathC: Int32Array,
   rows: number,
   cols: number,
   rng: () => number,
   factor: number
 ): void {
   const n = rows * cols;
-  const idx = (r: number, c: number) => r * cols + c;
+  const len = pathR.length;
   const pos = new Int32Array(n);
-  const rebuild = () => {
-    for (let i = 0; i < path.length; i++) pos[idx(path[i].row, path[i].col)] = i;
-  };
-  rebuild();
+  for (let i = 0; i < len; i++) pos[pathR[i] * cols + pathC[i]] = i;
 
   const moves = n * Math.max(1, factor);
   for (let m = 0; m < moves; m++) {
-    const k = path.length - 1;
-    const head = path[k];
-    const nbrs: Cell[] = [];
-    for (const d of DIRS) {
-      const nr = head.row + DELTA[d].dr;
-      const nc = head.col + DELTA[d].dc;
-      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) nbrs.push({ row: nr, col: nc });
-    }
-    const u = nbrs[Math.floor(rng() * nbrs.length)];
-    const j = pos[idx(u.row, u.col)];
+    const k = len - 1;
+    const hr = pathR[k];
+    const hc = pathC[k];
+
+    // 内联邻居计算
+    let nCount = 0;
+    if (hr > 0) nCount++;
+    if (hr < rows - 1) nCount++;
+    if (hc > 0) nCount++;
+    if (hc < cols - 1) nCount++;
+
+    let pick = Math.floor(rng() * nCount);
+    let ur = hr, uc = hc;
+    if (hr > 0 && pick-- === 0) { ur = hr - 1; }
+    else if (hr < rows - 1 && pick-- === 0) { ur = hr + 1; }
+    else if (hc > 0 && pick-- === 0) { uc = hc - 1; }
+    else { uc = hc + 1; }
+
+    const j = pos[ur * cols + uc];
     if (j < k - 1) {
-      // 反转 [j+1, k]
+      // 反转 [j+1, k]，同时更新 pos
       let lo = j + 1;
       let hi = k;
       while (lo < hi) {
-        const tmp = path[lo];
-        path[lo] = path[hi];
-        path[hi] = tmp;
-        lo++;
-        hi--;
+        let tr = pathR[lo]; pathR[lo] = pathR[hi]; pathR[hi] = tr;
+        let tc = pathC[lo]; pathC[lo] = pathC[hi]; pathC[hi] = tc;
+        pos[pathR[lo] * cols + pathC[lo]] = lo;
+        pos[pathR[hi] * cols + pathC[hi]] = hi;
+        lo++; hi--;
       }
-      for (let i = j + 1; i <= k; i++) pos[idx(path[i].row, path[i].col)] = i;
+      if (lo === hi) pos[pathR[lo] * cols + pathC[lo]] = lo;
     }
-    // 偶尔整体翻转，让尾端也被混洗
     if (rng() < 0.08) {
-      path.reverse();
-      rebuild();
+      let lo = 0;
+      let hi = k;
+      while (lo < hi) {
+        let tr = pathR[lo]; pathR[lo] = pathR[hi]; pathR[hi] = tr;
+        let tc = pathC[lo]; pathC[lo] = pathC[hi]; pathC[hi] = tc;
+        pos[pathR[lo] * cols + pathC[lo]] = lo;
+        pos[pathR[hi] * cols + pathC[hi]] = hi;
+        lo++; hi--;
+      }
+      if (lo === hi) pos[pathR[lo] * cols + pathC[lo]] = lo;
     }
   }
 }
 
 /** 把哈密顿路径切成长度 [minLen,maxLen] 的连续段，全覆盖、无长度1碎片 */
 function cutSegments(
-  path: Cell[],
+  pathR: Int32Array,
+  pathC: Int32Array,
   minLen: number,
   maxLen: number,
   rng: () => number
 ): Cell[][] {
   const segs: Cell[][] = [];
-  const total = path.length;
+  const total = pathR.length;
   let i = 0;
   while (i < total) {
     let len = minLen + Math.floor(rng() * (maxLen - minLen + 1));
     if (i + len > total) len = total - i;
-    // 避免在末尾留下单格
     if (total - (i + len) === 1) len++;
-    segs.push(path.slice(i, i + len));
+    const seg: Cell[] = [];
+    for (let k = i; k < i + len; k++) seg.push({ row: pathR[k], col: pathC[k] });
+    segs.push(seg);
     i += len;
   }
-  // 兜底：若末段为单格，并入前一段
   if (segs.length >= 2 && segs[segs.length - 1].length === 1) {
     const last = segs.pop()!;
     segs[segs.length - 1].push(...last);
@@ -133,24 +149,18 @@ function cutSegments(
 }
 
 /**
- * 单次尝试：全覆盖切段 + 反向消除定向。
- * 定向约束：飞出方向 = 头部段方向（箭头贴线、沿自身路径滑出）。
- * 反向消除的「定向顺序」即为合法消除顺序，保证可解；死锁返回 null 以便换种子重试。
+ * 反向消除定向（增量阻挡追踪）。
+ * 接受已切好的蛇形段，返回定向后的棋子；死锁返回 null。
  */
-function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
-  const { rows, cols, minLen, maxLen, axis, backbiteFactor } = p;
+function orientPieces(
+  rows: number,
+  cols: number,
+  snakes: Cell[][],
+  seed: number
+): RawPiece[] | null {
   const rng = makeRng(seed);
   const idx = (r: number, c: number) => r * cols + c;
-  const inBounds = (r: number, c: number) =>
-    r >= 0 && r < rows && c >= 0 && c < cols;
 
-  // 1) 全覆盖蛇形棋子
-  const transpose = axis === 'cols' ? true : axis === 'rows' ? false : rng() < 0.5;
-  const path = serpentine(rows, cols, transpose);
-  backbite(path, rows, cols, rng, backbiteFactor);
-  const snakes = cutSegments(path, minLen, maxLen, rng);
-
-  // 2) 反向消除定向
   const work = new Int32Array(rows * cols).fill(-1);
   for (let s = 0; s < snakes.length; s++) {
     for (const cell of snakes[s]) work[idx(cell.row, cell.col)] = s;
@@ -158,33 +168,85 @@ function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
   const remaining = new Set<number>();
   for (let s = 0; s < snakes.length; s++) remaining.add(s);
 
-  const rayClear = (head: Cell, dir: Direction): boolean => {
+  // 预计算每条蛇的头/尾方向
+  const headDirs: Direction[] = [];
+  const tailDirs: Direction[] = [];
+  for (let s = 0; s < snakes.length; s++) {
+    const cells = snakes[s];
+    const len = cells.length;
+    headDirs[s] = dirBetween(cells[len - 2], cells[len - 1]);
+    tailDirs[s] = dirBetween(cells[1], cells[0]);
+  }
+
+  // 检查射线是否被自身身体阻挡
+  const hasSelfBlock = (head: Cell, dir: Direction, self: number): boolean => {
     const { dr, dc } = DELTA[dir];
     let r = head.row + dr;
     let c = head.col + dc;
-    while (inBounds(r, c)) {
-      const o = work[idx(r, c)];
-      if (o !== -1) return false;
+    while (r >= 0 && r < rows && c >= 0 && c < cols) {
+      if (work[idx(r, c)] === self) return true;
       r += dr;
       c += dc;
     }
-    return true;
+    return false;
   };
+
+  // 扫描一条射线，返回射线上所有不同阻挡棋子（包含自身，用于正确计数）
+  const scanBlockers = (
+    head: Cell,
+    dir: Direction,
+  ): number[] => {
+    const { dr, dc } = DELTA[dir];
+    let r = head.row + dr;
+    let c = head.col + dc;
+    const blockers: number[] = [];
+    const seen = new Set<number>();
+    while (r >= 0 && r < rows && c >= 0 && c < cols) {
+      const o = work[idx(r, c)];
+      if (o !== -1 && !seen.has(o)) {
+        seen.add(o);
+        blockers.push(o);
+      }
+      r += dr;
+      c += dc;
+    }
+    return blockers;
+  };
+
+  // 分方向阻挡计数：头/尾射线各自独立追踪
+  // headBlockers[p] / tailBlockers[p] = 外部棋子阻挡数（不含自身）
+  // blockedByHead[b] / blockedByTail[b] = 被 b 阻挡的棋子列表
+  const headBlockers = new Int32Array(snakes.length);
+  const tailBlockers = new Int32Array(snakes.length);
+  const blockedByHead: number[][] = Array.from({ length: snakes.length }, () => []);
+  const blockedByTail: number[][] = Array.from({ length: snakes.length }, () => []);
+
+  for (const s of remaining) {
+    const cells = snakes[s];
+    const len = cells.length;
+    const hb = scanBlockers(cells[len - 1], headDirs[s]);
+    const tb = scanBlockers(cells[0], tailDirs[s]);
+    for (const b of hb) {
+      if (b !== s) { headBlockers[s]++; blockedByHead[b].push(s); }
+    }
+    for (const b of tb) {
+      if (b !== s) { tailBlockers[s]++; blockedByTail[b].push(s); }
+    }
+  }
 
   const oriented = new Map<number, RawPiece>();
   while (remaining.size > 0) {
+    // 收集当前可消除候选（头或尾方向无外部阻挡且无自身阻挡）
     const candidates: { snake: number; headIsLast: boolean; dir: Direction }[] =
       [];
     for (const s of remaining) {
       const cells = snakes[s];
       const len = cells.length;
-      const lastDir = dirBetween(cells[len - 2], cells[len - 1]);
-      if (rayClear(cells[len - 1], lastDir)) {
-        candidates.push({ snake: s, headIsLast: true, dir: lastDir });
+      if (headBlockers[s] === 0 && !hasSelfBlock(cells[len - 1], headDirs[s], s)) {
+        candidates.push({ snake: s, headIsLast: true, dir: headDirs[s] });
       }
-      const tailDir = dirBetween(cells[1], cells[0]);
-      if (rayClear(cells[0], tailDir)) {
-        candidates.push({ snake: s, headIsLast: false, dir: tailDir });
+      if (tailBlockers[s] === 0 && !hasSelfBlock(cells[0], tailDirs[s], s)) {
+        candidates.push({ snake: s, headIsLast: false, dir: tailDirs[s] });
       }
     }
     if (candidates.length === 0) return null; // 死锁
@@ -193,25 +255,16 @@ function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
     let bestScore = Infinity;
     let bestCandidates: typeof candidates = [];
     for (const candidate of candidates) {
-      const cells = snakes[candidate.snake];
-      // 临时清除该棋子的格子
-      for (const cell of cells) work[idx(cell.row, cell.col)] = -1;
-      // 统计剩余棋子中此时有多少可消除
+      const sn = candidate.snake;
       let clearCount = 0;
-      for (const s of remaining) {
-        if (s === candidate.snake) continue;
-        const scells = snakes[s];
-        const slen = scells.length;
-        const sLastDir = dirBetween(scells[slen - 2], scells[slen - 1]);
-        if (rayClear(scells[slen - 1], sLastDir)) {
-          clearCount++;
-        } else {
-          const sTailDir = dirBetween(scells[1], scells[0]);
-          if (rayClear(scells[0], sTailDir)) clearCount++;
-        }
+      // 统计移除该候选后有多少棋子变为可消除
+      // 合并两个方向的 blockedBy 并去重
+      const affected = new Set<number>();
+      for (const b of blockedByHead[sn]) affected.add(b);
+      for (const b of blockedByTail[sn]) affected.add(b);
+      for (const b of affected) {
+        if (remaining.has(b) && headBlockers[b] + tailBlockers[b] === 1) clearCount++;
       }
-      // 恢复 work 数组
-      for (const cell of cells) work[idx(cell.row, cell.col)] = candidate.snake;
       if (clearCount < bestScore) {
         bestScore = clearCount;
         bestCandidates = [candidate];
@@ -223,11 +276,45 @@ function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
     const cells = snakes[pick.snake];
     const ordered = pick.headIsLast ? cells.slice() : cells.slice().reverse();
     oriented.set(pick.snake, { cells: ordered, dir: pick.dir });
+
+    // 移除棋子并增量更新阻挡关系
     for (const cell of cells) work[idx(cell.row, cell.col)] = -1;
     remaining.delete(pick.snake);
+
+    // 重新扫描被移除棋子阻挡过的棋子（头+尾两个方向）
+    const affected = new Set<number>();
+    for (const b of blockedByHead[pick.snake]) affected.add(b);
+    for (const b of blockedByTail[pick.snake]) affected.add(b);
+    for (const p of affected) {
+      if (!remaining.has(p)) continue;
+      // 重新扫描以修正阻挡关系
+      const pcells = snakes[p];
+      const plen = pcells.length;
+      const hb = scanBlockers(pcells[plen - 1], headDirs[p]);
+      const tb = scanBlockers(pcells[0], tailDirs[p]);
+      headBlockers[p] = 0;
+      tailBlockers[p] = 0;
+      for (const b of hb) {
+        if (b !== p) { headBlockers[p]++; blockedByHead[b].push(p); }
+      }
+      for (const b of tb) {
+        if (b !== p) { tailBlockers[p]++; blockedByTail[b].push(p); }
+      }
+    }
   }
 
   return [...oriented.values()];
+}
+
+/** 单次完整生成：蛇形 + backbite + 切段 + 定向 */
+function tryGenerate(p: GenParams, seed: number): RawPiece[] | null {
+  const { rows, cols, minLen, maxLen, axis, backbiteFactor } = p;
+  const rng = makeRng(seed);
+  const transpose = axis === 'cols' ? true : axis === 'rows' ? false : rng() < 0.5;
+  const { pathR, pathC } = serpentine(rows, cols, transpose);
+  backbite(pathR, pathC, rows, cols, rng, backbiteFactor);
+  const snakes = cutSegments(pathR, pathC, minLen, maxLen, rng);
+  return orientPieces(rows, cols, snakes, seed + 50000000);
 }
 
 // ---- JSON 规则驱动 ----
@@ -296,24 +383,41 @@ function buildLevel(rule: LevelRule, baseSeed: number): LevelConfig {
 
   let best: { config: LevelConfig; score: number; dist: number } | null = null;
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const pieces = tryGenerate(params, baseSeed + attempt * 7919);
-    if (!pieces) continue;
-    const config: LevelConfig = {
-      id: rule.id,
-      rows: rule.rows,
-      cols: rule.cols,
-      pieces,
-      timeLimit: rule.timeLimit,
-    };
-    const state = createGameState(config, rule.id - 1);
-    if (!solve(state)) continue; // 只接受可解
-    const score = difficultyScore(state);
-    if (score >= target.min && score <= target.max) {
-      return config; // 命中目标难度
+  // 优化：每批共享蛇形结构，仅变化定向种子，避免重复 backbite
+  const BATCH = 2;
+  const numBatches = Math.ceil(maxAttempts / BATCH);
+
+  for (let batch = 0; batch < numBatches; batch++) {
+    // 每批生成一次蛇形结构（昂贵的 backbite 只在这里跑）
+    const batchPathSeed = baseSeed + batch * 7919;
+    const pathRng = makeRng(batchPathSeed);
+    const transpose = params.axis === 'cols' ? true : params.axis === 'rows' ? false : pathRng() < 0.5;
+    const { pathR, pathC } = serpentine(params.rows, params.cols, transpose);
+    backbite(pathR, pathC, params.rows, params.cols, pathRng, params.backbiteFactor);
+    const snakes = cutSegments(pathR, pathC, params.minLen, params.maxLen, pathRng);
+
+    for (let j = 0; j < BATCH; j++) {
+      const attempt = batch * BATCH + j;
+      if (attempt >= maxAttempts) break;
+      const orientSeed = baseSeed + attempt * 7919 + 50000000;
+      const pieces = orientPieces(params.rows, params.cols, snakes, orientSeed);
+      if (!pieces) continue;
+      const config: LevelConfig = {
+        id: rule.id,
+        rows: rule.rows,
+        cols: rule.cols,
+        pieces,
+        timeLimit: rule.timeLimit,
+      };
+      const state = createGameState(config, rule.id - 1);
+      if (!solve(state)) continue;
+      const score = difficultyScore(state);
+      if (score >= target.min && score <= target.max) {
+        return config;
+      }
+      const dist = Math.abs(score - mid);
+      if (!best || dist < best.dist) best = { config, score, dist };
     }
-    const dist = Math.abs(score - mid);
-    if (!best || dist < best.dist) best = { config, score, dist };
   }
 
   // 未命中目标区间：返回最接近的可解候选
@@ -347,3 +451,4 @@ export function levelCount(): number {
 
 /** 暴露默认生命/闪电配置，供其它模块读取 JSON 规则 */
 export const RULE_DEFAULTS = RULES.defaults;
+

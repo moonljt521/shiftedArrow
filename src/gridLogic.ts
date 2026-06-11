@@ -66,34 +66,94 @@ export function hasAnyMove(state: GameState): boolean {
 }
 
 /**
- * 贪心求解。可消除性单调（消除只清空格子、不新增障碍），故贪心即完备：
- * 反复消除任意当前可消除的棋子，能全清即可解。
+ * 贪心求解（队列优化）。
+ * 可消除性单调（消除只清空格子、不新增障碍），故贪心即完备。
+ * 使用增量阻挡追踪：初始扫描一次，移除棋子时仅重新检查受影响的棋子，
+ * 避免每轮全量扫描 O(P²)，总体复杂度 O(P * rayLen)。
  * 返回消除顺序的 pieceId 数组；若卡死返回 null。
  */
 export function solve(state: GameState): number[] | null {
   const rows = state.rows;
   const cols = state.cols;
-  const grid: (number | null)[][] = state.grid.map((row) => [...row]);
+  const flat = new Int32Array(rows * cols).fill(-1);
   const remaining = new Set<number>();
   const pieces = new Map<number, Piece>();
+  let maxId = -1;
   for (const p of state.pieces.values()) {
+    if (p.id > maxId) maxId = p.id;
     if (!p.removed) {
       remaining.add(p.id);
       pieces.set(p.id, p);
+      for (const cell of p.cells) {
+        flat[cell.row * cols + cell.col] = p.id;
+      }
     }
   }
 
+  // 初始扫描：为每个棋子建立阻挡关系
+  const blockerCount = new Int32Array(maxId + 1);
+  const blockedBy: number[][] = Array.from({ length: maxId + 1 }, () => []);
+
+  for (const id of remaining) {
+    const piece = pieces.get(id)!;
+    const head = piece.cells[piece.cells.length - 1];
+    const { dr, dc } = DELTA[piece.dir];
+    let r = head.row + dr;
+    let c = head.col + dc;
+    const seen = new Set<number>();
+    while (r >= 0 && r < rows && c >= 0 && c < cols) {
+      const o = flat[r * cols + c];
+      if (o !== -1 && !seen.has(o)) {
+        seen.add(o);
+        blockerCount[id]++;
+        if (o !== id) blockedBy[o].push(id);
+      }
+      r += dr;
+      c += dc;
+    }
+  }
+
+  // 将初始可消除棋子加入队列
+  const queue: number[] = [];
+  for (const id of remaining) {
+    if (blockerCount[id] === 0) queue.push(id);
+  }
+
   const order: number[] = [];
-  let progress = true;
-  while (remaining.size > 0 && progress) {
-    progress = false;
-    for (const id of [...remaining]) {
-      const piece = pieces.get(id)!;
-      if (canEliminate(grid, rows, cols, piece)) {
-        for (const cell of piece.cells) grid[cell.row][cell.col] = null;
-        remaining.delete(id);
-        order.push(id);
-        progress = true;
+  while (queue.length > 0) {
+    const id = queue.pop()!;
+    if (!remaining.has(id)) continue;
+    const piece = pieces.get(id)!;
+    order.push(id);
+    remaining.delete(id);
+    // 清除棋子的所有格子
+    for (const cell of piece.cells) flat[cell.row * cols + cell.col] = -1;
+
+    // 增量更新：仅重新检查被该棋子阻挡的棋子
+    for (const blocked of blockedBy[id]) {
+      if (!remaining.has(blocked)) continue;
+      blockerCount[blocked]--;
+      if (blockerCount[blocked] === 0) {
+        queue.push(blocked);
+      } else {
+        // 仍有阻挡，重新扫描以修正阻挡关系
+        const bp = pieces.get(blocked)!;
+        const bh = bp.cells[bp.cells.length - 1];
+        const { dr, dc } = DELTA[bp.dir];
+        let r = bh.row + dr;
+        let c = bh.col + dc;
+        blockerCount[blocked] = 0;
+        const seen2 = new Set<number>();
+        while (r >= 0 && r < rows && c >= 0 && c < cols) {
+          const o = flat[r * cols + c];
+          if (o !== -1 && !seen2.has(o)) {
+            seen2.add(o);
+            blockerCount[blocked]++;
+            if (o !== blocked) blockedBy[o].push(blocked);
+          }
+          r += dr;
+          c += dc;
+        }
       }
     }
   }

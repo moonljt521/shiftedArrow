@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { canEliminate, difficultyScore, hasAnyMove, solve } from '../src/gridLogic';
 import { createGameState, useHint } from '../src/gameState';
-import { LEVELS } from '../src/levels';
+import { getLevel, levelCount } from '../src/levels';
+
+/** 按需获取关卡（仅在测试运行时生成） */
+function getLevels() {
+  const count = levelCount();
+  return Array.from({ length: count }, (_, i) => getLevel(i));
+}
 import rules from '../src/levelRules.json';
 import { Cell, Direction, GameState, Piece, dirBetween } from '../src/types';
 
@@ -100,7 +106,8 @@ describe('canEliminate（折线棋子）', () => {
 
 describe('solve & hasAnyMove', () => {
   it('所有内置关卡均可解（保证可解的生成算法）', () => {
-    for (const level of LEVELS) {
+    const levels = getLevels();
+    for (const level of levels) {
       const state = createGameState(level, level.id - 1);
       const order = solve(state);
       expect(order, `关卡 ${level.id} 应可解`).not.toBeNull();
@@ -117,7 +124,8 @@ describe('solve & hasAnyMove', () => {
   });
 
   it('提示返回的棋子必须是当前可消除棋子', () => {
-    for (const level of LEVELS) {
+    const levels = getLevels();
+    for (const level of levels) {
       const state = createGameState(level, level.id - 1);
       const id = useHint(state);
       expect(id).not.toBeNull();
@@ -128,7 +136,8 @@ describe('solve & hasAnyMove', () => {
 
 describe('生成关卡结构', () => {
   it('棋子为多格折线且相邻、界内、无重叠', () => {
-    for (const level of LEVELS) {
+    const levels = getLevels();
+    for (const level of levels) {
       const occupied = new Set<string>();
       for (const piece of level.pieces) {
         expect(piece.cells.length).toBeGreaterThanOrEqual(2);
@@ -152,7 +161,8 @@ describe('生成关卡结构', () => {
   });
 
   it('网格被完全填满，无空白格子', () => {
-    for (const level of LEVELS) {
+    const levels = getLevels();
+    for (const level of levels) {
       const occupied = new Set<string>();
       for (const piece of level.pieces) {
         for (const c of piece.cells) occupied.add(`${c.row},${c.col}`);
@@ -162,7 +172,8 @@ describe('生成关卡结构', () => {
   });
 
   it('飞出方向必须等于头部段方向（箭头贴合线、沿路径滑出）', () => {
-    for (const level of LEVELS) {
+    const levels = getLevels();
+    for (const level of levels) {
       for (const piece of level.pieces) {
         const n = piece.cells.length;
         const expected = dirBetween(piece.cells[n - 2], piece.cells[n - 1]);
@@ -174,16 +185,22 @@ describe('生成关卡结构', () => {
 
 describe('难度递增 (需求 6.3)', () => {
   it('时间逐关递减且不低于 15s', () => {
-    for (let i = 1; i < LEVELS.length; i++) {
-      expect(LEVELS[i].timeLimit).toBeLessThanOrEqual(LEVELS[i - 1].timeLimit);
-      expect(LEVELS[i].timeLimit).toBeGreaterThanOrEqual(15);
+    const count = levelCount();
+    for (let i = 1; i < count; i++) {
+      const prev = getLevel(i - 1);
+      const curr = getLevel(i);
+      expect(curr.timeLimit).toBeLessThanOrEqual(prev.timeLimit);
+      expect(curr.timeLimit).toBeGreaterThanOrEqual(15);
     }
   });
 
   it('难度评分总体随关卡递增（趋势）', () => {
-    const scores = LEVELS.map((lv) =>
-      difficultyScore(createGameState(lv, lv.id - 1))
-    );
+    const count = levelCount();
+    const scores: number[] = [];
+    for (let i = 0; i < count; i++) {
+      const lv = getLevel(i);
+      scores.push(difficultyScore(createGameState(lv, lv.id - 1)));
+    }
     // 末关难度应高于首关
     expect(scores[scores.length - 1]).toBeGreaterThan(scores[0]);
     // 单调性允许个别波动，但整体趋势向上：后半段均值 > 前半段均值
@@ -194,13 +211,14 @@ describe('难度递增 (需求 6.3)', () => {
 
   it('每关难度评分落在其 JSON 目标区间内（或最接近）', () => {
     // 至少多数关卡命中目标区间
+    const count = levelCount();
     let hit = 0;
-    for (let i = 0; i < LEVELS.length; i++) {
-      const lv = LEVELS[i];
+    for (let i = 0; i < count; i++) {
+      const lv = getLevel(i);
       const score = difficultyScore(createGameState(lv, lv.id - 1));
       const t = RULES.levels[i].difficulty!;
       if (score >= t.min - 0.05 && score <= t.max + 0.05) hit++;
     }
-    expect(hit).toBeGreaterThanOrEqual(Math.ceil(LEVELS.length * 0.6));
+    expect(hit).toBeGreaterThanOrEqual(Math.ceil(count * 0.6));
   });
 });
